@@ -1,11 +1,13 @@
 package com.example.mingh.fabflix;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
@@ -25,9 +27,13 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -39,15 +45,15 @@ import javax.xml.parsers.ParserConfigurationException;
 
 public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
 
-    private final List<String> movies;
-    private List<String> filteredMovies;
+    private static final int MAX_RESULTS = 10;
     private Context context;
+    private List<String> filteredMovies;
 
-    public MovieAutoCompleteAdapter(Context context, List<String> movies) {
-        super(context, 0, movies);
-        this.movies = movies;
-        this.filteredMovies = movies;
+
+    public MovieAutoCompleteAdapter(Context context, int resource) {
+        super(context, resource);
         this.context = context;
+        filteredMovies = new ArrayList<String>();
     }
 
     @Override
@@ -67,21 +73,23 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
 
     @Override
     public Filter getFilter() {
-        Filter movieFiler = new Filter() {
+        return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
 
-                filteredMovies.clear();
+                FilterResults results = new FilterResults();
 
-                final FilterResults results = new FilterResults();
-
-                if (constraint == null || constraint.length() == 0) {
-                    filteredMovies.addAll(movies);
-                } else {
+                if (constraint != null && constraint.length() != 0) {
                     final String filterPattern = constraint.toString().toLowerCase().trim();
-                    String url = "http://35.163.190.44:8080/FabflixMobile/Main?title=" + filterPattern;
 
-                    final Map<String, String> params = new HashMap<String, String>();
+                    String url = null;
+                    try {
+                        url = "http://35.163.190.44:8080/FabflixMobile/Main?title=" + URLEncoder.encode(filterPattern,"UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                    Log.d("URL", url);
+                    final Map<String, String> param = new HashMap<String, String>();
                     RequestQueue queue = Volley.newRequestQueue(context);
 
                     StringRequest getRequest = new StringRequest(Request.Method.GET, url,
@@ -89,6 +97,8 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
+
+                                    filteredMovies.clear();
 
                                     Log.d("response", response);
 //                        ((TextView)findViewById(R.id.http_response)).setText(response);
@@ -128,6 +138,10 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
                                                 filteredMovies.add(title);
                                                 Log.d("title", title);
                                             }
+                                            for(int i = 0; i < movies.getLength(); ++i)
+                                            {
+                                                Log.d("filterMovie", filteredMovies.get(i));
+                                            }
                                         }
                                     }
                                 }
@@ -142,7 +156,7 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
                     ) {
                         @Override
                         protected Map<String, String> getParams() {
-                            return params;
+                            return param;
                         }
                     };
 
@@ -158,30 +172,31 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                if (results.count == 0)
-                    notifyDataSetInvalidated();
-                else {
-                    filteredMovies = (List<String>) results.values;
+                if(results != null && results.count > 0){
                     notifyDataSetChanged();
+                }else{
+                    notifyDataSetInvalidated();
                 }
             }
         };
 
-        return movieFiler;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // Get the data item from filtered list.
+
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        View view = inflater.inflate(R.layout.row_movie,parent,false);
+
         String title = filteredMovies.get(position);
 
-        // Inflate your custom row layout as usual.
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-        convertView = inflater.inflate(R.layout.row_movie, parent, false);
+        TextView titleTv = (TextView) view.findViewById(R.id.row_title);
 
-        TextView tvName = (TextView) convertView.findViewById(R.id.row_title);
-        tvName.setText(title);
+        titleTv.setText(title);
 
-        return convertView;
+        return view;
+
     }
+
+
 }

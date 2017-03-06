@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 
@@ -20,28 +21,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AutoCompleteTextView tvMovie = (AutoCompleteTextView) findViewById(R.id.autocompleteView);
-        final MovieAutoCompleteAdapter adapter = new MovieAutoCompleteAdapter(this, R.layout.activity_main, R.id.row_title, movies);
-
-        tvMovie.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.d("CharSequence", s.toString());
-                adapter.getFilter().filter(s.toString());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
+        final AutoCompleteTextView tvMovie = (AutoCompleteTextView) findViewById(R.id.autocompleteView);
+        final MovieAutoCompleteAdapter adapter = new MovieAutoCompleteAdapter(this, android.R.layout.simple_dropdown_item_1line);
 
         tvMovie.setAdapter(adapter);
+
+        tvMovie.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                String title = adapter.getItem(position);
+                tvMovie.setText(title);
+            }
+        });
+//
+
     }
 
 }
