@@ -81,6 +81,11 @@ public class LoginActivity extends AppCompatActivity {
     private void login()
     {
 
+        if(!validate())
+        {
+            return;
+        }
+
         logInButton.setEnabled(false);
 
         final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this,
@@ -182,6 +187,7 @@ public class LoginActivity extends AppCompatActivity {
 
         queue.add(getRequest);
 
+
     }
 
 
@@ -203,23 +209,23 @@ public class LoginActivity extends AppCompatActivity {
             return Integer.parseInt(getTextValue(ele,tagName).trim());
         } catch(NumberFormatException e)
         {
-            System.out.println("Invalid Year Information: " + getTextValue(ele,tagName));
             return -1;
         }
     }
 
-    public static void printDocument(Document doc, OutputStream out) throws IOException, TransformerException {
-        TransformerFactory tf = TransformerFactory.newInstance();
-        Transformer transformer = tf.newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-
-        transformer.transform(new DOMSource(doc),
-                new StreamResult(new OutputStreamWriter(out, "UTF-8")));
+    private boolean validate()
+    {
+        String username = usernameText.getText().toString();
+        String password = passwordText.getText().toString();
+        if(username.contains(" ") || password.contains(" "))
+        {
+            Toast.makeText(getBaseContext(), "Uuername or password cannot contain space", Toast.LENGTH_LONG).show();
+            logInButton.setEnabled(true);
+            return false;
+        }
+        return true;
     }
+
 
 
 }

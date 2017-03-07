@@ -85,6 +85,7 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
                     String url = null;
                     try {
                         url = "http://35.163.190.44:8080/FabflixMobile/Main?title=" + URLEncoder.encode(filterPattern,"UTF-8");
+
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -97,10 +98,9 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
                             new Response.Listener<String>() {
                                 @Override
                                 public void onResponse(String response) {
-
                                     filteredMovies.clear();
 
-                                    Log.d("response", response);
+//                                    Log.d("response", response);
 //                        ((TextView)findViewById(R.id.http_response)).setText(response);
                                     Document doc = null;
                                     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -138,10 +138,7 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
                                                 filteredMovies.add(title);
                                                 Log.d("title", title);
                                             }
-                                            for(int i = 0; i < movies.getLength(); ++i)
-                                            {
-                                                Log.d("filterMovie", filteredMovies.get(i));
-                                            }
+
                                         }
                                     }
                                 }
@@ -161,6 +158,7 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
                     };
 
                     queue.add(getRequest);
+
 
                 }
                 Log.d("movies", filteredMovies.get(0));
@@ -198,5 +196,28 @@ public class MovieAutoCompleteAdapter extends ArrayAdapter<String> implements Fi
 
     }
 
+//    private class DownloadMovies extends AsyncTask<String, Void, ArrayList<String>>{
+//
+//        @Override
+//        protected ArrayList<String> doInBackground(String... params) {
+//
+//            final ArrayList<String> titles = new ArrayList<String>();
+//
+//
+//
+//            return titles;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(ArrayList<String> result) {
+////            notifyDataSetChanged();
+//            for(int i = 0; i < result.size(); ++i)
+//            {
+//                Log.d("filterMovie", result.get(i));
+//            }
+//        }
+//    }
 
-}
+
+
+    }
